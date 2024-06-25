@@ -39,9 +39,12 @@ class ImageUploadController extends GetxController {
         if (connectivityResult == ConnectivityResult.none) {
           throw Exception('No internet connection');
         }
-        await sendImageChunk(imageChunks[i]);
-        await ImageStorage.removeImageChunk(i);
-        imageChunks.value = await ImageStorage.getImageChunks();
+        if (connectivityResult == ConnectivityResult.wifi ||
+            connectivityResult == ConnectivityResult.mobile) {
+          await sendImageChunk(imageChunks[i]);
+          await ImageStorage.removeImageChunk(i);
+          imageChunks.value = await ImageStorage.getImageChunks();
+        }
       } catch (e) {
         break;
       }

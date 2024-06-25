@@ -41,7 +41,6 @@ class ImageStorage {
 
     // Save JSON chunks to SharedPreferences using the UUID key
     await prefs.setStringList(uuidKey, jsonChunks);
-    Future<List<List<ImageModel>>> value = getImageChunks();
     print(uuidKey);
     print(jsonChunks);
     // Optionally return the UUID key for later retrieval
