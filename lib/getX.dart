@@ -33,6 +33,7 @@ class ImageUploadController extends GetxController {
     if (isUploading.value) return;
     isUploading.value = true;
 
+    List<String> taskKeys = await ImageStorage.getTaskKeys();
     for (int i = 0; i < imageChunks.length; i++) {
       try {
         var connectivityResult = await NetworkMonitor.checkConnectivity();
@@ -41,8 +42,8 @@ class ImageUploadController extends GetxController {
         }
         if (connectivityResult == ConnectivityResult.wifi ||
             connectivityResult == ConnectivityResult.mobile) {
-          await sendImageChunk(imageChunks[i]);
-          await ImageStorage.removeImageChunk(i);
+          String task_key = await sendImageChunk(taskKeys[i], imageChunks[i]);
+          if (task_key != "") await ImageStorage.removeImageChunk(task_key);
           imageChunks.value = await ImageStorage.getImageChunks();
         }
       } catch (e) {
@@ -52,4 +53,8 @@ class ImageUploadController extends GetxController {
 
     isUploading.value = false;
   }
+}
+
+class callCounter extends GetxController {
+  int count = 0;
 }

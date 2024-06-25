@@ -30,24 +30,28 @@ class ImageUploadController extends GetxController {
   Future<void> addImageChunks(List<ImageModel> images) async {
     await ImageStorage.saveImageChunks(images);
     imageChunks.value = await ImageStorage.getImageChunks();
-    // print(jsonEncode(imageChunks));
+    print("image chunk refreshed: ${jsonEncode(imageChunks)}");
   }
 
   Future<void> uploadImages() async {
     if (isUploading.value) return;
     isUploading.value = true;
 
+    List<String> taskKeys = await ImageStorage.getTaskKeys();
     for (int i = 0; i < imageChunks.length; i++) {
       try {
         var connectivityResult = await NetworkMonitor.checkConnectivity();
         if (connectivityResult == ConnectivityResult.none) {
-          throw Exception('No internet connection');
+          //throw Exception('No internet connection');
+          await Future.delayed(Duration(seconds: 60));
+          i--;
         }
 
-        bool success = await sendImageChunk(imageChunks[i]);
-        if (success) {
-          await ImageStorage.removeImageChunk(i);
+        String task_key = await sendImageChunk(taskKeys[i], imageChunks[i]);
+        if (task_key != "") {
+          await ImageStorage.removeImageChunk(task_key);
           imageChunks.value = await ImageStorage.getImageChunks();
+          print("sumit success: ${jsonEncode(imageChunks[i])}");
           i--; // Adjust the index because we removed an element
         } else {
           await Future.delayed(Duration(seconds: 60));
@@ -60,5 +64,6 @@ class ImageUploadController extends GetxController {
     }
 
     isUploading.value = false;
+    print("images upload complete");
   }
 }

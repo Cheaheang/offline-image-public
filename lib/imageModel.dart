@@ -15,4 +15,8 @@ class ImageModel {
   factory ImageModel.fromJson(Map<String, dynamic> json) {
     return ImageModel(json['base64'] as String);
   }
+
+  Future<Uint8List> readAsByteAsync() async {
+    return base64Decode(base64);
+  }
 }
